@@ -1,60 +1,78 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import yaml from 'js-yaml'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { YamlForm } from './yaml-form'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import yaml from 'js-yaml';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { YamlFormField } from './yaml-form';
 
 interface YamlToFormsProps {
-  initialYaml?: string
+  initialYaml?: string;
 }
 
 export default function YamlToForms({ initialYaml }: YamlToFormsProps) {
-  const [yamlInput, setYamlInput] = useState(initialYaml || '')
-  const [parsedYaml, setParsedYaml] = useState<Record<string, any> | null>(null)
-  const router = useRouter()
+  const [yamlInput, setYamlInput] = useState(initialYaml || '');
+  const [parsedYaml, setParsedYaml] = useState<Record<string, any> | null>(null);
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const router = useRouter();
 
   useEffect(() => {
     if (initialYaml) {
-      handleParseYaml()
+      handleParseYaml();
     }
-  }, [initialYaml])
+  }, [initialYaml]);
 
   const handleParseYaml = () => {
     try {
-      const parsed = yaml.load(yamlInput) as Record<string, any>
-      setParsedYaml(parsed)
+      const parsed = yaml.load(yamlInput) as Record<string, any>;
+      setParsedYaml(parsed);
+      setFormData(parsed); // Initialize the form data with parsed YAML
     } catch (error) {
-      console.error('Error parsing YAML:', error)
-      alert('Error parsing YAML. Please check your input.')
+      console.error('Error parsing YAML:', error);
+      alert('Error parsing YAML. Please check your input.');
     }
-  }
+  };
+
+  const handleInputChange = (name: string, value: any) => {
+    const updateNestedObject = (obj: Record<string, any>, path: string[], val: any): Record<string, any> => {
+      const [current, ...rest] = path;
+      if (!rest.length) {
+        return { ...obj, [current]: val };
+      }
+      return { ...obj, [current]: updateNestedObject(obj[current] || {}, rest, val) };
+    };
+
+    const path = name.split(':');
+    setFormData((prev) => updateNestedObject(prev, path, value));
+  };
 
   const handleSaveYaml = async () => {
     try {
-      const response = await fetch('/api/yaml', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ yaml_data: yamlInput }),
-      })
+      const updatedYaml = yaml.dump(formData);
+      setYamlInput(updatedYaml);
+      // const response = await fetch('/api/yaml', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ yaml_data: updatedYaml }),
+      // });
 
-      if (!response.ok) {
-        throw new Error('Failed to save YAML')
-      }
+      // if (!response.ok) {
+      //   throw new Error('Failed to save YAML');
+      // }
 
-      const { id } = await response.json()
-      alert(`YAML saved successfully. ID: ${id}`)
-      router.push(`/${id}`)
+      // const { id } = await response.json();
+      alert(`YAML saved successfully. ID: ${
+        // id ||
+         'new'}`);
+      // router.push(`/${id}`);
     } catch (error) {
-      console.error('Error saving YAML:', error)
-      alert('Error saving YAML. Please try again.')
+      console.error('Error saving YAML:', error);
+      alert('Error saving YAML. Please try again.');
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -68,20 +86,18 @@ export default function YamlToForms({ initialYaml }: YamlToFormsProps) {
         <Button onClick={handleParseYaml}>Parse YAML</Button>
         <Button onClick={handleSaveYaml}>Save YAML</Button>
       </div>
-      
+
       {parsedYaml && (
-        <Accordion type="single" collapsible className="w-full">
-          {Object.entries(parsedYaml).map(([key, value]) => (
-            <AccordionItem key={key} value={key}>
-              <AccordionTrigger>{key}</AccordionTrigger>
-              <AccordionContent>
-                <YamlForm id={key} data={value} />
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <form
+          className="space-y-4"
+          onChange={(e) => {
+            const target = e.target as HTMLInputElement;
+            handleInputChange(target.name, target.type === 'checkbox' ? target.checked : target.value);
+          }}
+        >
+          <YamlFormField id="form" data={parsedYaml} />
+        </form>
       )}
     </div>
-  )
+  );
 }
-
