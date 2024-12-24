@@ -1,5 +1,4 @@
 import { db } from '@/lib/db'
-import YamlToForms from '@/components/yaml-to-forms'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -10,7 +9,7 @@ export default async function YamlFormPage({
 }: PageProps) {
   const params = await Params;
   const yamlData = await db
-    .selectFrom('yaml_forms')
+    .selectFrom('yamls')
     .selectAll()
     .where('id', '=', parseInt(params.id))
     .executeTakeFirst()
@@ -22,7 +21,7 @@ export default async function YamlFormPage({
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Saved YAML Form</h1>
-      <YamlToForms initialYaml={yamlData.yaml_data} />
+    
     </div>
   )
 }
