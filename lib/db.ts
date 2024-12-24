@@ -1,12 +1,8 @@
 import { Generated, sql } from 'kysely'
 import { createKysely } from '@vercel/postgres-kysely'
 
-export const db = createKysely<Database>()
-export { sql } from 'kysely'
-
-
 interface Database {
-    yaml_forms: YamlTable
+    yamls: YamlTable
     errors: ErrorTable
     performance: PerformanceTable
 }
@@ -16,6 +12,9 @@ interface YamlTable {
     yaml_data: string
     created_at: Generated<Date>
 }
+
+export const db = createKysely<Database>()
+export { sql } from 'kysely'
 
 interface ErrorTable {
     id: Generated<number>

@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   
   try {
     const result = await db
-      .insertInto('yaml_forms')
+      .insertInto('yamls')
       .values({ yaml_data })
       .returningAll()
       .executeTakeFirstOrThrow()
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await db
-      .selectFrom('yaml_forms')
+      .selectFrom('yamls')
       .selectAll()
       .where('id', '=', parseInt(id))
       .executeTakeFirst()
