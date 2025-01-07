@@ -6,7 +6,7 @@ import { Instrumentation } from 'next'
 
 export async function register() {
   // Set up the database tables
-  await setupDatabase()
+  // await setupDatabase()
   
   // Initialize observability
   await initObservability()

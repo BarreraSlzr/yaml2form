@@ -1,77 +1,133 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import { YamlCommandForm } from "@/components/yaml-command-form"
-import { CreateCommandForm } from "@/components/create-command-form"
-import yaml from 'js-yaml'
-import { YamlStructure } from '@/components/yaml-command-menu'
+import { YamlCommandWrapper } from '@/components/yaml-command-wrapper'
+import { YamlContentProvider } from '@/contexts/yaml-content'
 
-const initialYamlContent = `
-Frontend:
-  React:
-    id: react
-    description: A JavaScript library for building user interfaces
-  Vue:
-    id: vue
-    description: A progressive framework for building user interfaces
-  Angular:
-    id: angular
-    description: A platform for building mobile and desktop web applications
-
-Backend:
-  Node.js:
-    id: nodejs
-    description: JavaScript runtime built on Chrome's V8 JavaScript engine
-  Django:
-    id: django
-    description: A high-level Python web framework
-  Ruby on Rails:
-    id: rails
-    description: A web application framework written in Ruby
-
-Database:
-  MySQL:
-    id: mysql
-    description: An open-source relational database management system
-  MongoDB:
-    id: mongodb
-    description: A source-available cross-platform document-oriented database program
-  PostgreSQL:
-    id: postgresql
-    description: A free and open-source relational database management system
-`
+const initialYamlContent = {
+  "Project Overview": {
+    "name": {
+      id: "project-overview-name",
+      description: "YAML Command Menu Project"
+    },
+    "description": {
+      id: "project-overview-description",
+      description: "A flexible and efficient way to manage and display hierarchical data in a command menu interface, with persistent storage using IndexedDB"
+    },
+    "main_features": {
+      id: "project-overview-main-features",
+      description: "Search functionality, Add new items, Customizable item rendering, Responsive design, IndexedDB integration"
+    }
+  },
+  "Technologies": {
+    "framework": {
+      id: "technologies-framework",
+      description: "Next.js with App Router"
+    },
+    "ui_library": {
+      id: "technologies-ui-library",
+      description: "shadcn/ui components"
+    },
+    "styling": {
+      id: "technologies-styling",
+      description: "Tailwind CSS"
+    },
+    "state_management": {
+      id: "technologies-state-management",
+      description: "React Context API"
+    },
+    "data_persistence": {
+      id: "technologies-data-persistence",
+      description: "IndexedDB"
+    }
+  },
+  "Code Style": {
+    "language": {
+      id: "code-style-language",
+      description: "TypeScript"
+    },
+    "component_structure": {
+      id: "code-style-component-structure",
+      description: "Functional components with hooks"
+    },
+    "naming_convention": {
+      id: "code-style-naming-convention",
+      description: "camelCase for variables and functions, PascalCase for components and interfaces"
+    },
+    "file_naming": {
+      id: "code-style-file-naming",
+      description: "kebab-case for file names"
+    }
+  },
+  "Workflow": {
+    "version_control": {
+      id: "workflow-version-control",
+      description: "Git with feature branches and pull requests"
+    },
+    "code_review": {
+      id: "workflow-code-review",
+      description: "Peer review required before merging to main branch"
+    },
+    "testing": {
+      id: "workflow-testing",
+      description: "Jest for unit tests, React Testing Library for component tests"
+    },
+    "deployment": {
+      id: "workflow-deployment",
+      description: "Vercel for continuous deployment"
+    }
+  },
+  "Component Structure": {
+    "yaml_command_wrapper": {
+      id: "component-structure-yaml-command-wrapper",
+      description: "Main component that renders the command menu interface"
+    },
+    "command_dialog_form": {
+      id: "component-structure-command-dialog-form",
+      description: "Form component for adding new items to the YAML content"
+    },
+    "yaml_command_menu": {
+      id: "component-structure-yaml-command-menu",
+      description: "Renders the list of YAML content items"
+    },
+    "default_item_template": {
+      id: "component-structure-default-item-template",
+      description: "Default template for rendering individual YAML items"
+    }
+  },
+  "Context and Hooks": {
+    "yaml_content_context": {
+      id: "context-and-hooks-yaml-content-context",
+      description: "React context that manages the YAML content state and IndexedDB operations"
+    },
+    "use_yaml_content": {
+      id: "context-and-hooks-use-yaml-content",
+      description: "Custom hook for accessing and updating YAML content"
+    }
+  },
+  "Accessibility": {
+    "semantic_html": {
+      id: "accessibility-semantic-html",
+      description: "Use of semantic HTML elements for better structure and accessibility"
+    },
+    "aria_attributes": {
+      id: "accessibility-aria-attributes",
+      description: "Proper use of ARIA roles and attributes where necessary"
+    },
+    "keyboard_navigation": {
+      id: "accessibility-keyboard-navigation",
+      description: "Ensure all interactive elements are keyboard accessible"
+    }
+  }
+}
 
 export default function Home() {
-  const [yamlContent, setYamlContent] = useState<YamlStructure>({})
-
-  const handleYamlUpdate = (newYaml: YamlStructure) => {
-    setYamlContent({ ...yamlContent, ...newYaml })
-  }
-
-  useEffect(() => {
-    const yamlString = initialYamlContent;
-    try {
-      const parsedYaml = yaml.load(yamlString) as YamlStructure
-      setYamlContent(parsedYaml);
-    } catch (e) {
-      console.error("Failed to parse YAML:", e)
-    }
-  }, [])
-
   return (
-    <div className="container mx-auto p-4 font-sans">
-      <h1 className="text-4xl font-bold mb-6 text-gray-900">YAML2Form</h1>
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Create New Command</h2>
-          <CreateCommandForm onSave={handleYamlUpdate} />
-        </div>
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Existing Commands</h2>
-          <YamlCommandForm yamlContent={yamlContent} onUpdate={setYamlContent} />
-        </div>
-      </div>
-    </div>
+    <YamlContentProvider initialYamlContent={initialYamlContent}>
+      <main className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">YAML Command Menu</h1>
+        <YamlCommandWrapper />
+      </main>
+    </YamlContentProvider>
   )
 }
 
